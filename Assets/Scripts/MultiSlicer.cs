@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using EzySlice;
 using System.Threading.Tasks;
+using UnityEngine.VFX;
 
 public class MultiSlicer : MonoBehaviour
 {
@@ -13,6 +14,8 @@ public class MultiSlicer : MonoBehaviour
 
     private Vector3 startPos, endPos;
     public Transform A, B;
+    public GameObject vfxPos;
+    public VisualEffect slash;
     public bool cut = false;
 
     async void Update()
@@ -22,8 +25,10 @@ public class MultiSlicer : MonoBehaviour
         if (cut)
         {
             Debug.Log("start Cut");
+            vfxPos.transform.position = slicableObjects[0].transform.position;
             AverageSliceAllObjects(cutPlaneNormal, sliceCount);
             NewFood();
+            slash.Play();
             cut = false;
         }
         if (Input.GetMouseButtonDown(0))
