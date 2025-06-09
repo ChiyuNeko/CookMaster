@@ -3,6 +3,9 @@ using UnityEngine;
 using EzySlice;
 using System.Threading.Tasks;
 using UnityEngine.VFX;
+using Unity.VisualScripting;
+using System.Linq;
+using System.Collections;
 
 public class MultiSlicer : MonoBehaviour
 {
@@ -15,21 +18,34 @@ public class MultiSlicer : MonoBehaviour
     private Vector3 startPos, endPos;
     public Transform A, B;
     public GameObject vfxPos;
-    public VisualEffect slash;
+    public VisualEffect[] slash;
     public bool cut = false;
+    public GameObject cam;
+    int count = 0;
 
-    async void Update()
+    public void Update()
     {
         Vector3 cutLineDir = (A.position - B.position).normalized;
-        Vector3 cutPlaneNormal = Vector3.Cross(cutLineDir, Camera.main.transform.forward).normalized;
+        List<GameObject> Food = GameObject.FindGameObjectsWithTag("Food").ToList();
+        Debug.Log(Camera.main);
+        Vector3 cutPlaneNormal = Vector3.Cross(cutLineDir, cam.transform.forward).normalized;
+        slicableObjects = Food;
         if (cut)
         {
-            Debug.Log("start Cut");
-            vfxPos.transform.position = slicableObjects[0].transform.position;
-            AverageSliceAllObjects(cutPlaneNormal, sliceCount);
-            NewFood();
-            slash.Play();
+
+            //vfxPos.transform.position = slicableObjects[0].transform.position;
+            //NewFood();
+            StartCoroutine(NewFood());
+            //slash.Play();
+            StartCoroutine(GenerateSlash());
             cut = false;
+            count = 0;
+        }
+        if (count >= 20)
+        {
+            cutPlaneNormal = Vector3.Cross(cutLineDir, Camera.main.transform.forward).normalized;
+            AverageSliceAllObjects(cutPlaneNormal, sliceCount);
+            count = 0;
         }
         if (Input.GetMouseButtonDown(0))
         {
@@ -66,13 +82,6 @@ public class MultiSlicer : MonoBehaviour
         }
         return Vector3.zero;
     }
-    async Task Cut(Vector3 planeNormal, int parts)
-    {
-        await Task.Run(() =>
-        {
-            AverageSliceAllObjects(planeNormal, parts);
-        });
-    }
 
     void AverageSliceAllObjects(Vector3 planeNormal, int parts)
     {
@@ -85,7 +94,7 @@ public class MultiSlicer : MonoBehaviour
 
             Queue<GameObject> queue = new Queue<GameObject>();
             queue.Enqueue(obj);
-            
+
             Renderer rend = obj.GetComponent<Renderer>();
             if (rend == null)
             {
@@ -133,7 +142,7 @@ public class MultiSlicer : MonoBehaviour
                 }
             }
             Debug.Log(planeNormal);
-            
+
             // while (queue.Count > 0)
             // {
             //      slicableObjects.Add(queue.Dequeue());
@@ -147,11 +156,12 @@ public class MultiSlicer : MonoBehaviour
 
         obj.transform.position += offset;
 
-        MeshCollider col = obj.AddComponent<MeshCollider>();
-        col.convex = true;
+        BoxCollider col = obj.AddComponent<BoxCollider>();
+        //col.convex = true;
 
         Rigidbody rb = obj.AddComponent<Rigidbody>();
         rb.mass = 1f;
+        rb.drag = 10f;
 
         obj.name = "SlicedPart";
 
@@ -163,10 +173,31 @@ public class MultiSlicer : MonoBehaviour
         if (!slicableObjects.Contains(obj))
             slicableObjects.Add(obj);
     }
-    public void NewFood()
+    public IEnumerator NewFood()
     {
-        GameObject food = Instantiate(FoodObjects[0], SpawnPos.position, Quaternion.identity);
-        slicableObjects.Add(food);
+        yield return new WaitForSeconds(5);
+
+        for (int i = 0; i < 5; i++)
+        {
+            Instantiate(FoodObjects[0], SpawnPos.position + Vector3.forward * i * 2, Quaternion.identity);
+        }
+        
+    }
+    IEnumerator GenerateSlash()
+    {
+        for (int i = 0; i <= 20; i++)
+        {
+            float x = Random.Range(0, 180);
+            float y = Random.Range(0, 180);
+            float z = Random.Range(0, 180);
+            int index = Random.Range(0, 2);
+            VisualEffect vfx = Instantiate(slash[index], SpawnPos.position, Quaternion.Euler(x, y, z));
+            vfx.Play();
+            count++;
+            yield return new WaitForSeconds(0.05f);
+            Destroy(vfx.gameObject, 2);
+            
+        }
     }
     
 }
