@@ -173,6 +173,15 @@ public class MultiSlicer : MonoBehaviour
         if (!slicableObjects.Contains(obj))
             slicableObjects.Add(obj);
     }
+    public void FoodFloat()
+    {
+        foreach (GameObject i in slicableObjects)
+        {
+            Rigidbody rb = i.GetComponent<Rigidbody>();
+            rb.AddForce(Vector3.up * 10000);
+            rb.drag = 25;
+        }
+    }
     public IEnumerator NewFood()
     {
         yield return new WaitForSeconds(5);
@@ -181,7 +190,7 @@ public class MultiSlicer : MonoBehaviour
         {
             Instantiate(FoodObjects[0], SpawnPos.position + Vector3.forward * i * 2, Quaternion.identity);
         }
-        
+
     }
     IEnumerator GenerateSlash()
     {
