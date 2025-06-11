@@ -43,8 +43,8 @@ public class MultiSlicer : MonoBehaviour
         }
         if (count >= 20)
         {
-            cutPlaneNormal = Vector3.Cross(cutLineDir, Camera.main.transform.forward).normalized;
-            AverageSliceAllObjects(cutPlaneNormal, sliceCount);
+            //cutPlaneNormal = Vector3.Cross(cutLineDir, Camera.main.transform.forward).normalized;
+            AverageSliceAllObjects(new Vector3(-0.32f, 0.79f, 0.52f), sliceCount);
             count = 0;
         }
         if (Input.GetMouseButtonDown(0))
