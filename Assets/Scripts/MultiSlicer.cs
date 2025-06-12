@@ -6,12 +6,16 @@ using UnityEngine.VFX;
 using Unity.VisualScripting;
 using System.Linq;
 using System.Collections;
+using UnityEngine.SocialPlatforms.Impl;
+using TMPro;
 
 public class MultiSlicer : MonoBehaviour
 {
+    public Material[] Materials;
     public Material cutMaterial;
     public List<GameObject> FoodObjects = new List<GameObject>();
     public Transform SpawnPos;
+    public Transform VFXPos;
     public List<GameObject> slicableObjects = new List<GameObject>();
     public int sliceCount = 8; // 切成幾塊
 
@@ -21,22 +25,20 @@ public class MultiSlicer : MonoBehaviour
     public VisualEffect[] slash;
     public bool cut = false;
     public GameObject cam;
+    public TextMeshProUGUI ScoreText;
+    public int score = 0;
     int count = 0;
 
     public void Update()
     {
+        
         Vector3 cutLineDir = (A.position - B.position).normalized;
-        List<GameObject> Food = GameObject.FindGameObjectsWithTag("Food").ToList();
         Debug.Log(Camera.main);
         Vector3 cutPlaneNormal = Vector3.Cross(cutLineDir, cam.transform.forward).normalized;
-        slicableObjects = Food;
         if (cut)
         {
-
-            //vfxPos.transform.position = slicableObjects[0].transform.position;
-            //NewFood();
+            IsCuttedFood();
             StartCoroutine(NewFood());
-            //slash.Play();
             StartCoroutine(GenerateSlash());
             cut = false;
             count = 0;
@@ -90,6 +92,14 @@ public class MultiSlicer : MonoBehaviour
 
         foreach (GameObject obj in currentObjects)
         {
+            if (obj.GetComponent<FoodStatus>().NeedCook)
+            {
+                cutMaterial = Materials[1];
+            }
+            else
+            {
+                cutMaterial = Materials[0];
+            }
             if (obj == null) continue;
 
             Queue<GameObject> queue = new Queue<GameObject>();
@@ -175,22 +185,61 @@ public class MultiSlicer : MonoBehaviour
     }
     public void FoodFloat()
     {
-        foreach (GameObject i in slicableObjects)
+        List<GameObject> Food = GameObject.FindGameObjectsWithTag("Food").ToList();
+        foreach (GameObject i in Food)
         {
             Rigidbody rb = i.GetComponent<Rigidbody>();
-            rb.AddForce(Vector3.up * 10000);
-            rb.drag = 25;
+            rb.AddForce(Vector3.up * 8000);
+            rb.drag = 40;
+            rb.angularDrag = 40;
+            i.GetComponent<FoodStatus>().isFloating = true;
         }
+    }
+    public void IsCuttedFood()
+    {
+        List<GameObject> Food = GameObject.FindGameObjectsWithTag("Food").ToList();
+        
+        foreach (GameObject i in Food)
+        {
+            if (i.GetComponent<FoodStatus>().Cutted == true)
+            {
+                slicableObjects.Add(i);
+            }
+        }
+        score += slicableObjects.Count;
     }
     public IEnumerator NewFood()
     {
+        int x = Random.Range(0, 3);
         yield return new WaitForSeconds(5);
+        ScoreText.text = "Score:" + score.ToString();
 
-        for (int i = 0; i < 5; i++)
+        List<GameObject> Food = GameObject.FindGameObjectsWithTag("Food").ToList();
+        foreach (GameObject i in Food)
         {
-            Instantiate(FoodObjects[0], SpawnPos.position + Vector3.forward * i * 2, Quaternion.identity);
+            Destroy(i);
         }
 
+        slicableObjects.Clear();
+        if (x == 2)
+        {
+            for (int i = 0; i < 5; i++)
+            {
+                int y = Random.Range(0, 2);
+                if (y == 0)
+                    Instantiate(FoodObjects[0], SpawnPos.position + Vector3.forward * i * 0.7f, Quaternion.identity);
+                else
+                    Instantiate(FoodObjects[1], SpawnPos.position + Vector3.forward * i * 0.7f, Quaternion.Euler(0, 90, 0));
+            }
+        }
+        if (x == 1)
+        {
+            Instantiate(FoodObjects[2], SpawnPos.position, Quaternion.identity);
+        }
+        if (x == 0)
+        {
+            Instantiate(FoodObjects[3], SpawnPos.position, Quaternion.Euler(0, 90, 0));
+        }
     }
     IEnumerator GenerateSlash()
     {
@@ -200,7 +249,8 @@ public class MultiSlicer : MonoBehaviour
             float y = Random.Range(0, 180);
             float z = Random.Range(0, 180);
             int index = Random.Range(0, 2);
-            VisualEffect vfx = Instantiate(slash[index], SpawnPos.position, Quaternion.Euler(x, y, z));
+            float offset = Random.Range(0, 2);
+            VisualEffect vfx = Instantiate(slash[index], VFXPos.position + offset * Vector3.forward, Quaternion.Euler(x, y, z));
             vfx.Play();
             count++;
             yield return new WaitForSeconds(0.05f);
