@@ -268,7 +268,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _hand: {fileID: 34228919}
-  _fingerFeatureStateProvider: {fileID: 237683338}
+  _fingerFeatureStateProvider: {fileID: 1685624690}
   _shapes:
   - {fileID: 11400000, guid: 117afb990f8aa8f4cb50eba90f821042, type: 2}
 --- !u!1 &69283274
@@ -631,18 +631,6 @@ Transform:
   - {fileID: 1265313034}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &237683338 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 2483171112586171397, guid: f54012181eacade4ea242c65f804720f,
-    type: 3}
-  m_PrefabInstance: {fileID: 1696974890}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b942c16a6d6a4edaad7c18c7d5762cdf, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &429513011 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: -7271449666460269675, guid: 8803578b55c0899458e4395afbda9fc5,
