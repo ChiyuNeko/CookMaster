@@ -23,6 +23,8 @@ public class MultiSlicer : MonoBehaviour
     public Transform A, B;
     public GameObject vfxPos;
     public VisualEffect[] slash;
+    public VisualEffect Floating;
+    public AudioSource FloatingSFX;
     public bool cut = false;
     public GameObject cam;
     public TextMeshProUGUI ScoreText;
@@ -194,6 +196,8 @@ public class MultiSlicer : MonoBehaviour
             rb.angularDrag = 40;
             i.GetComponent<FoodStatus>().isFloating = true;
         }
+        Floating.Play();
+        FloatingSFX.Play();
     }
     public void IsCuttedFood()
     {
